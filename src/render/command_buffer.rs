@@ -1,0 +1,119 @@
+use std::marker::PhantomData;
+use std::ops::{Deref, DerefMut};
+use ash::vk;
+use ash::vk::{CommandBufferBeginInfo, CommandBufferUsageFlags, DependencyInfo, ImageMemoryBarrier2, RenderingInfo, StructureType};
+
+pub struct CommandBuffer {
+    command_buffer: vk::CommandBuffer,
+    device: ash::Device,
+}
+
+pub struct CommandRecorder<'a>(&'a mut CommandBuffer);
+
+impl CommandBuffer {
+    pub fn wrap(device: &ash::Device, command_buffer: vk::CommandBuffer) -> Self {
+        Self { command_buffer, device: device.clone() }
+    }
+
+    #[inline]
+    pub fn begin(&mut self, begin_info: Option<CommandBufferBeginInfo>) -> anyhow::Result<CommandRecorder<'_>> {
+        CommandRecorder::begin(self, begin_info)
+    }
+}
+
+pub struct ImageTransition {
+    pub image: vk::Image,
+    pub subresource_range: vk::ImageSubresourceRange,
+    pub src_state: (vk::PipelineStageFlags2, vk::ImageLayout, vk::AccessFlags2, u32),
+    pub dst_state: (vk::PipelineStageFlags2, vk::ImageLayout, vk::AccessFlags2, u32),
+}
+
+impl<'a> CommandRecorder<'a> {
+    pub fn begin(command_buffer: &'a mut CommandBuffer, begin_info: Option<CommandBufferBeginInfo>) -> anyhow::Result<Self> {
+        unsafe {
+            let begin_info = begin_info.unwrap_or(CommandBufferBeginInfo::default());
+
+            command_buffer.device.begin_command_buffer(command_buffer.command_buffer, &begin_info)
+        }?;
+
+        Ok(Self(command_buffer))
+    }
+
+    pub fn pipeline_barrier(&self, dependency_info: DependencyInfo) {
+        unsafe {
+            let _ = self.0.device.cmd_pipeline_barrier2(self.0.command_buffer, &dependency_info);
+        }
+    }
+
+    pub fn image_transitions(&self, transitions: &[ImageTransition]) {
+        let image_memory_barriers = transitions.iter()
+            .map(|t| ImageMemoryBarrier2 {
+                s_type: StructureType::IMAGE_MEMORY_BARRIER_2,
+                p_next: std::ptr::null_mut(),
+                src_stage_mask: t.src_state.0,
+                src_access_mask: t.src_state.2,
+                dst_stage_mask: t.dst_state.0,
+                dst_access_mask: t.dst_state.2,
+                old_layout: t.src_state.1,
+                new_layout: t.dst_state.1,
+                src_queue_family_index: t.src_state.3,
+                dst_queue_family_index: t.dst_state.3,
+                image: t.image,
+                subresource_range: t.subresource_range,
+                _marker: PhantomData,
+            })
+            .collect::<Vec<_>>();
+
+        let dependency_info = DependencyInfo::default()
+            .image_memory_barriers(image_memory_barriers.as_slice());
+
+        self.pipeline_barrier(dependency_info);
+    }
+
+    #[inline]
+    pub fn image_transition(&self, transition: ImageTransition) {
+        self.image_transitions(&[transition]);
+    }
+
+    #[inline]
+    pub fn begin_rendering(&self, rendering_info: RenderingInfo) -> DynamicRenderingRecorder<'_, 'a> {
+        DynamicRenderingRecorder::begin(self, rendering_info)
+    }
+}
+
+impl Drop for CommandRecorder<'_> {
+    fn drop(&mut self) {
+        unsafe { let _ = self.device.end_command_buffer(self.command_buffer); }
+    }
+}
+
+impl Deref for CommandRecorder<'_> {
+    type Target = CommandBuffer;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
+
+pub struct DynamicRenderingRecorder<'a, 'b>(&'a CommandRecorder<'b>);
+
+impl<'a, 'b> Deref for DynamicRenderingRecorder<'a, 'b> where 'b: 'a {
+    type Target = CommandRecorder<'b>;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
+
+impl<'a, 'b> DynamicRenderingRecorder<'a, 'b> {
+    pub fn begin(command_recorder: &'a CommandRecorder<'b>, rendering_info: RenderingInfo) -> Self {
+        let _ = unsafe { command_recorder.device.cmd_begin_rendering(command_recorder.command_buffer, &rendering_info) };
+        Self(command_recorder)
+    }
+}
+
+impl Drop for DynamicRenderingRecorder<'_, '_> {
+    fn drop(&mut self) {
+        unsafe { self.device.cmd_end_rendering(self.command_buffer) };
+    }
+}
