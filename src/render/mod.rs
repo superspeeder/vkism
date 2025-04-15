@@ -306,6 +306,14 @@ impl RenderSystem {
         .try_into()
         .map_err(|_| anyhow!("Command buffer allocation failed"))
     }
+
+    pub fn queues(&self) -> &Queues {
+        &self.queues
+    }
+
+    pub fn queue_families(&self) -> &QueueFamilyInfo {
+        &self.queue_family_info
+    }
 }
 
 impl Drop for RenderSystem {

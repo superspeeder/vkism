@@ -19,6 +19,10 @@ impl CommandBuffer {
     pub fn begin(&mut self, begin_info: Option<CommandBufferBeginInfo>) -> anyhow::Result<CommandRecorder<'_>> {
         CommandRecorder::begin(self, begin_info)
     }
+
+    pub fn handle(&self) -> vk::CommandBuffer {
+        self.command_buffer
+    }
 }
 
 pub struct ImageTransition {

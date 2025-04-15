@@ -45,9 +45,9 @@ pub struct WindowSystem {
     glfw: Glfw,
 }
 
-struct SurfaceInfo {
-    surface: vk::SurfaceKHR,
-    surface_fn: khr::surface::Instance,
+pub struct SurfaceInfo {
+    pub surface: vk::SurfaceKHR,
+    pub surface_fn: khr::surface::Instance,
 }
 
 pub struct Window {
@@ -115,6 +115,10 @@ impl Window {
         self.surface = Some(SurfaceInfo{surface, surface_fn});
 
         Ok(())
+    }
+
+    pub fn surface(&self) -> Option<&SurfaceInfo> {
+        self.surface.as_ref()
     }
 }
 
