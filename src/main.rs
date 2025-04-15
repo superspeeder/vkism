@@ -19,7 +19,6 @@ fn main() -> anyhow::Result<()> {
     let mut window = window_system.create_window((800, 600), "Hello!", WindowMode::Windowed)?;
     window.create_surface(&render_system)?;
 
-    // let mut render_target =
     let mut primary_renderer = PrimaryRenderer::new(&render_system)?;
     let mut window_target = SwapchainRenderTarget::new(window, &render_system)?;
 
@@ -27,7 +26,7 @@ fn main() -> anyhow::Result<()> {
         0,
         Some(ClearValue {
             color: ClearColorValue {
-                float32: [0.5, 0.5, 0.5, 1.0],
+                float32: [0.25, 0.5, 0.5, 1.0],
             },
         }),
     );
