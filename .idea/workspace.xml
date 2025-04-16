@@ -7,9 +7,11 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="04cca75f-cb9b-4f5e-a164-345a405f03f9" name="Changes" comment="">
+    <list default="true" id="04cca75f-cb9b-4f5e-a164-345a405f03f9" name="Changes" comment="log the fps">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/primary_renderer.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/primary_renderer.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/render_target.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/render_target.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,11 +107,24 @@
       <option name="presentableId" value="Default" />
       <updated>1744737477450</updated>
       <workItem from="1744737478751" duration="37000" />
-      <workItem from="1744737757348" duration="17612000" />
+      <workItem from="1744737757348" duration="17929000" />
     </task>
+    <task id="LOCAL-00001" summary="log the fps">
+      <option name="closed" value="true" />
+      <created>1744821136712</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1744821136712</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="log the fps" />
+    <option name="LAST_COMMIT_MESSAGE" value="log the fps" />
   </component>
 </project>

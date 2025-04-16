@@ -23,14 +23,7 @@ fn main() -> anyhow::Result<()> {
     let mut primary_renderer = PrimaryRenderer::new(&render_system)?;
     let mut window_target = SwapchainRenderTarget::new(window, &render_system)?;
 
-    primary_renderer.set_clear_value(
-        0,
-        Some(ClearValue {
-            color: ClearColorValue {
-                float32: [0.25, 0.5, 0.5, 1.0],
-            },
-        }),
-    );
+    primary_renderer.set_clear_color(0, Some([0.25, 0.5, 0.5, 1.0]));
 
     window_target.set_key_polling(true);
 
@@ -50,7 +43,6 @@ fn main() -> anyhow::Result<()> {
 
         primary_renderer.render_to_target(&mut window_target, |_cmd, _frame_info| {});
 
-
         frame_counter += 1;
         if frame_counter % 1000 == 0 {
             debug!("FPS: {:?}", 1.0 / delta_time);
@@ -59,7 +51,6 @@ fn main() -> anyhow::Result<()> {
         last_frame = this_frame;
         this_frame = window_system.get_time();
         delta_time = this_frame - last_frame;
-
     }
 
     unsafe { _ = render_system.device().device_wait_idle() };

@@ -1,4 +1,4 @@
-use std::{ops::{Deref, DerefMut}, u64};
+use std::ops::{Deref, DerefMut};
 
 use crate::render::RenderSystem;
 use crate::window::Window;
@@ -189,9 +189,8 @@ impl SwapchainRenderTarget {
             .min_image_count(image_count)
             .present_mode(present_mode);
 
-        let swapchain_fn = unsafe {
-            khr::swapchain::Device::new(render_system.instance(), render_system.device())
-        };
+        let swapchain_fn =
+            khr::swapchain::Device::new(render_system.instance(), render_system.device());
 
         let swapchain = unsafe { swapchain_fn.create_swapchain(&swapchain_create_info, None) }?;
 

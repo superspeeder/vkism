@@ -25,7 +25,7 @@ pub struct PrimaryRenderer {
     command_buffers: FrameSet<CommandBuffer>,
 
     render_area: Option<vk::Rect2D>,
-    clear_values: Vec<Option<vk::ClearValue>>,
+    color_clear_values: Vec<Option<[f32; 4]>>,
 
     current_frame: usize,
 }
@@ -44,7 +44,7 @@ impl PrimaryRenderer {
             fences,
             command_buffers,
             render_area: None,
-            clear_values: Vec::new(),
+            color_clear_values: Vec::new(),
             current_frame: 0,
         })
     }
@@ -61,12 +61,12 @@ impl PrimaryRenderer {
         self.current_frame = (self.current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    pub fn set_clear_value(&mut self, index: usize, value: Option<vk::ClearValue>) {
-        if self.clear_values.len() <= index {
-            self.clear_values.resize(index + 1, None);
+    pub fn set_clear_color(&mut self, index: usize, value: Option<[f32; 4]>) {
+        if self.color_clear_values.len() <= index {
+            self.color_clear_values.resize(index + 1, None);
         }
 
-        self.clear_values[index] = value;
+        self.color_clear_values[index] = value;
     }
 
     pub fn set_render_area(&mut self, area: Option<vk::Rect2D>) {
@@ -178,7 +178,12 @@ impl PrimaryRenderer {
                             .iter()
                             .enumerate()
                             .map(|(i, attachment)| {
-                                let clear_value = self.clear_values.get(i).cloned().unwrap_or(None);
+                                let clear_value =
+                                    self.color_clear_values.get(i).cloned().unwrap_or(None).map(
+                                        |c| ClearValue {
+                                            color: vk::ClearColorValue { float32: c },
+                                        },
+                                    );
 
                                 RenderingAttachmentInfo::default()
                                     .image_layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
