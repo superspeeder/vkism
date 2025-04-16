@@ -1,8 +1,9 @@
 pub mod command_buffer;
 pub mod primary_renderer;
 pub mod render_target;
-mod pipeline;
-mod descriptor;
+pub mod pipeline;
+pub mod descriptor;
+pub mod shader;
 
 use crate::render::command_buffer::CommandBuffer;
 use crate::window::WindowSystem;
@@ -316,6 +317,10 @@ impl RenderSystem {
     pub fn queue_families(&self) -> &QueueFamilyInfo {
         &self.queue_family_info
     }
+
+    pub fn pipeline_cache(&self) -> vk::PipelineCache {
+        vk::PipelineCache::null() // TODO: impl this
+    }
 }
 
 impl Drop for RenderSystem {
@@ -326,43 +331,3 @@ impl Drop for RenderSystem {
         }
     }
 }
-
-// #[inline]
-// pub fn test_vk_result_err_only(result: vk::Result) -> Result<(), vk::Result> {
-//     match result {
-//         vk::Result::SUCCESS
-//         | vk::Result::NOT_READY
-//         | vk::Result::TIMEOUT
-//         | vk::Result::EVENT_SET
-//         | vk::Result::EVENT_RESET
-//         | vk::Result::INCOMPLETE
-//         | vk::Result::SUBOPTIMAL_KHR
-//         | vk::Result::THREAD_IDLE_KHR
-//         | vk::Result::THREAD_DONE_KHR
-//         | vk::Result::OPERATION_DEFERRED_KHR
-//         | vk::Result::OPERATION_NOT_DEFERRED_KHR
-//         | vk::Result::PIPELINE_COMPILE_REQUIRED
-//         | vk::Result::INCOMPATIBLE_SHADER_BINARY_EXT => Ok(()),
-//         e => Err(e),
-//     }
-// }
-//
-// #[inline]
-// pub fn test_vk_result(result: vk::Result) -> Result<vk::Result, vk::Result> {
-//     match result.clone() {
-//         vk::Result::SUCCESS
-//         | vk::Result::NOT_READY
-//         | vk::Result::TIMEOUT
-//         | vk::Result::EVENT_SET
-//         | vk::Result::EVENT_RESET
-//         | vk::Result::INCOMPLETE
-//         | vk::Result::SUBOPTIMAL_KHR
-//         | vk::Result::THREAD_IDLE_KHR
-//         | vk::Result::THREAD_DONE_KHR
-//         | vk::Result::OPERATION_DEFERRED_KHR
-//         | vk::Result::OPERATION_NOT_DEFERRED_KHR
-//         | vk::Result::PIPELINE_COMPILE_REQUIRED
-//         | vk::Result::INCOMPATIBLE_SHADER_BINARY_EXT => Ok(result),
-//         e => Err(e),
-//     }
-// }
