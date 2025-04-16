@@ -1,6 +1,8 @@
 pub mod command_buffer;
 pub mod primary_renderer;
 pub mod render_target;
+mod pipeline;
+mod descriptor;
 
 use crate::render::command_buffer::CommandBuffer;
 use crate::window::WindowSystem;

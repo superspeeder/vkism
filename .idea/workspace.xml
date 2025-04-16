@@ -7,11 +7,11 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="04cca75f-cb9b-4f5e-a164-345a405f03f9" name="Changes" comment="log the fps">
+    <list default="true" id="04cca75f-cb9b-4f5e-a164-345a405f03f9" name="Changes" comment="Simplify setting clear colors for attachments on a PrimaryRenderer">
+      <change afterPath="$PROJECT_DIR$/src/render/descriptor.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/render/pipeline.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/render/primary_renderer.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/primary_renderer.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/render/render_target.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/render_target.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,7 +107,7 @@
       <option name="presentableId" value="Default" />
       <updated>1744737477450</updated>
       <workItem from="1744737478751" duration="37000" />
-      <workItem from="1744737757348" duration="17929000" />
+      <workItem from="1744737757348" duration="19993000" />
     </task>
     <task id="LOCAL-00001" summary="log the fps">
       <option name="closed" value="true" />
@@ -117,7 +117,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744821136712</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Simplify setting clear colors for attachments on a PrimaryRenderer">
+      <option name="closed" value="true" />
+      <created>1744821436075</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1744821436075</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -125,6 +133,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="log the fps" />
-    <option name="LAST_COMMIT_MESSAGE" value="log the fps" />
+    <MESSAGE value="Simplify setting clear colors for attachments on a PrimaryRenderer" />
+    <option name="LAST_COMMIT_MESSAGE" value="Simplify setting clear colors for attachments on a PrimaryRenderer" />
   </component>
 </project>
