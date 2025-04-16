@@ -4,6 +4,7 @@ use crate::render::shader::ShaderModule;
 use anyhow::anyhow;
 use ash::vk;
 use ash::vk::{PipelineLayoutCreateFlags, PipelineLayoutCreateInfo, StructureType};
+use std::ffi::CString;
 use std::marker::PhantomData;
 use std::ops::Range;
 use std::rc::Rc;
@@ -124,6 +125,8 @@ pub struct RasterizerDepthBias {
 
 pub struct RasterizerDescription {
     pub polygon_mode: vk::PolygonMode,
+    pub cull_mode: vk::CullModeFlags,
+    pub front_face: vk::FrontFace,
     pub clamp_depth: bool,
     pub discard_output: bool,
     pub depth_bias: Option<RasterizerDepthBias>,
@@ -159,7 +162,7 @@ pub struct ColorBlendingDescription {
 pub struct PipelineDescription {
     pub layout: Rc<PipelineLayout>,
     pub rendering_compatibility: PipelineRenderCompatibility,
-    pub shader_stages: (vk::ShaderStageFlags, Rc<ShaderModule>, String),
+    pub shader_stages: Vec<(vk::ShaderStageFlags, Rc<ShaderModule>, String)>,
     pub vertex_layout: VertexLayout,
 
     // fixed function
@@ -180,10 +183,108 @@ impl Pipeline {
         description: &PipelineDescription,
     ) -> anyhow::Result<Self> {
         let vertex_description = vk::PipelineVertexInputStateCreateInfo::default()
-            .vertex_binding_descriptions(description.vertex_layout.bindings.as_slice());
+            .vertex_binding_descriptions(description.vertex_layout.bindings.as_slice())
+            .vertex_attribute_descriptions(description.vertex_layout.attributes.as_slice());
 
-        let mut create_info =
-            vk::GraphicsPipelineCreateInfo::default().layout(description.layout.handle());
+        let (render_pass, subpass, mut rendering_state) = match &description.rendering_compatibility
+        {
+            PipelineRenderCompatibility::UseRenderPass(render_pass, subpass) => {
+                (render_pass.clone(), subpass.clone(), None)
+            }
+            PipelineRenderCompatibility::RenderingInfo {
+                view_mask,
+                color_attachment_formats,
+                depth_attachment_format,
+                stencil_attachment_format,
+            } => (
+                vk::RenderPass::null(),
+                0,
+                Some(
+                    vk::PipelineRenderingCreateInfo::default()
+                        .color_attachment_formats(color_attachment_formats.as_slice())
+                        .depth_attachment_format(depth_attachment_format.clone())
+                        .stencil_attachment_format(stencil_attachment_format.clone())
+                        .view_mask(view_mask.clone()),
+                ),
+            ),
+        };
+
+        let stages_mapped = description
+            .shader_stages
+            .iter()
+            .cloned()
+            .map(|(stage, module, entry)| (stage, module, CString::new(entry).unwrap()))
+            .collect::<Vec<_>>();
+
+        let stages = stages_mapped
+            .iter()
+            .map(|(stage, module, entry)| {
+                vk::PipelineShaderStageCreateInfo::default()
+                    .module(module.handle())
+                    .stage(stage.clone())
+                    .name(entry.as_c_str())
+            })
+            .collect::<Vec<_>>();
+
+        let input_assembly_state = vk::PipelineInputAssemblyStateCreateInfo::default()
+            .primitive_restart_enable(description.allow_primitive_restart)
+            .topology(description.primitive_topology);
+
+        let tessellation_state = vk::PipelineTessellationStateCreateInfo::default()
+            .patch_control_points(description.tessellator_patch_control_points);
+
+        let (viewports, scissors) = description.viewports.iter().cloned().fold(
+            (Vec::<vk::Viewport>::new(), Vec::<vk::Rect2D>::new()),
+            |(mut viewports, mut scissors), (viewport, scissor)| {
+                viewports.push(viewport);
+                scissors.push(scissor);
+                (viewports, scissors)
+            },
+        );
+
+        let viewport_state = vk::PipelineViewportStateCreateInfo::default()
+            .viewports(viewports.as_slice())
+            .scissors(scissors.as_slice());
+
+        let mut rasterizer_state = vk::PipelineRasterizationStateCreateInfo::default()
+            .cull_mode(description.rasterizer.cull_mode)
+            .polygon_mode(description.rasterizer.polygon_mode)
+            .depth_clamp_enable(description.rasterizer.clamp_depth)
+            .depth_bias_enable(description.rasterizer.depth_bias.is_some())
+            .line_width(description.rasterizer.line_width)
+            .front_face(description.rasterizer.front_face)
+            .rasterizer_discard_enable(description.rasterizer.discard_output);
+        if let Some(bias) = description.rasterizer.depth_bias.as_ref() {
+            rasterizer_state = rasterizer_state
+                .depth_bias_clamp(bias.clamp)
+                .depth_bias_constant_factor(bias.constant_factor)
+                .depth_bias_slope_factor(bias.slope_facator);
+        }
+
+        let sample_mask_raw = [((description.multisampling.sample_mask >> 32) & 0xffffffff) as u32, (description.multisampling.sample_mask & 0xffffffff) as u32];
+        let sample_mask_slice = if description.multisampling.rasterization_samples == vk::SampleCountFlags::;
+
+        let multisample_state = vk::PipelineMultisampleStateCreateInfo::default()
+            .alpha_to_coverage_enable(description.multisampling.alpha_to_coverage)
+            .alpha_to_one_enable(description.multisampling.alpha_to_one)
+            .min_sample_shading(description.multisampling.min_sample_shading.unwrap_or(1.0))
+            .sample_shading_enable(description.multisampling.min_sample_shading.is_some())
+            .sample_mask()
+
+        let mut create_info = vk::GraphicsPipelineCreateInfo::default()
+            .layout(description.layout.handle())
+            .render_pass(render_pass)
+            .subpass(subpass)
+            .stages(stages.as_slice())
+            .vertex_input_state(&vertex_description)
+            .input_assembly_state(&input_assembly_state)
+            .tessellation_state(&tessellation_state)
+            .viewport_state(&viewport_state)
+            .rasterization_state(&rasterizer_state);
+
+        if let Some(rendering_state) = rendering_state.as_mut() {
+            create_info = create_info.push_next(rendering_state);
+        }
 
         let device = render_system.device().clone();
         unsafe {

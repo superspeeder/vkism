@@ -54,6 +54,9 @@ impl ShaderModule {
         Self::new(render_system, spirv.as_binary())
     }
 
+    pub fn handle(&self) -> vk::ShaderModule {
+        self.shader_module
+    }
 }
 
 impl Drop for ShaderModule {
