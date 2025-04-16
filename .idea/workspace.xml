@@ -8,17 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="04cca75f-cb9b-4f5e-a164-345a405f03f9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/render/command_buffer.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/render/mod.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/render/primary_renderer.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/render/render_target.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/window.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +27,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "superspeeder"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "git@github.com:superspeeder/vkism.git",
+    "accountId": "57bac151-b056-4d2d-97db-68781ceded8a"
+  }
+}]]></component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="ohSLdqWk" />
   </component>
@@ -102,7 +105,7 @@
       <option name="presentableId" value="Default" />
       <updated>1744737477450</updated>
       <workItem from="1744737478751" duration="37000" />
-      <workItem from="1744737757348" duration="13736000" />
+      <workItem from="1744737757348" duration="17612000" />
     </task>
     <servers />
   </component>

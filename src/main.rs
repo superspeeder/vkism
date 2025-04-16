@@ -10,6 +10,7 @@ use crate::render::primary_renderer::PrimaryRenderer;
 use crate::window::WindowSystem;
 use ash::vk::{ClearColorValue, ClearValue};
 use glfw::{Action, Key, WindowEvent, WindowMode};
+use log::debug;
 use render::render_target::SwapchainRenderTarget;
 
 fn main() -> anyhow::Result<()> {
@@ -33,6 +34,12 @@ fn main() -> anyhow::Result<()> {
 
     window_target.set_key_polling(true);
 
+    let mut this_frame = window_system.get_time();
+    let mut last_frame = this_frame - 1.0 / 60.0;
+    let mut delta_time = this_frame - last_frame;
+
+    let mut frame_counter: usize = 0;
+
     while !window_target.should_close() {
         window_target.poll_events(|_, event, window| match event {
             WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
@@ -42,6 +49,17 @@ fn main() -> anyhow::Result<()> {
         });
 
         primary_renderer.render_to_target(&mut window_target, |_cmd, _frame_info| {});
+
+
+        frame_counter += 1;
+        if frame_counter % 1000 == 0 {
+            debug!("FPS: {:?}", 1.0 / delta_time);
+        }
+
+        last_frame = this_frame;
+        this_frame = window_system.get_time();
+        delta_time = this_frame - last_frame;
+
     }
 
     unsafe { _ = render_system.device().device_wait_idle() };
