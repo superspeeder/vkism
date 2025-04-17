@@ -321,11 +321,14 @@ impl RenderSystem {
     pub fn pipeline_cache(&self) -> vk::PipelineCache {
         vk::PipelineCache::null() // TODO: impl this
     }
+
+    // pub fn update_descriptor_sets(&self, )
 }
 
 impl Drop for RenderSystem {
     fn drop(&mut self) {
         unsafe {
+            self.device.destroy_command_pool(self.main_pool, None);
             self.device.destroy_device(None);
             self.instance.destroy_instance(None);
         }

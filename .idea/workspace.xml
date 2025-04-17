@@ -7,11 +7,17 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="04cca75f-cb9b-4f5e-a164-345a405f03f9" name="Changes" comment="Simplify setting clear colors for attachments on a PrimaryRenderer">
-      <change afterPath="$PROJECT_DIR$/src/render/descriptor.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/render/pipeline.rs" afterDir="false" />
+    <list default="true" id="04cca75f-cb9b-4f5e-a164-345a405f03f9" name="Changes" comment="Start work on pipelines.">
+      <change afterPath="$PROJECT_DIR$/res/main.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/res/main.vert" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/command_buffer.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/command_buffer.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/descriptor.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/descriptor.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/render/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/pipeline.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/pipeline.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/primary_renderer.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/primary_renderer.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/render/render_target.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render/render_target.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,18 +35,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "superspeeder"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;superspeeder&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "git@github.com:superspeeder/vkism.git",
-    "accountId": "57bac151-b056-4d2d-97db-68781ceded8a"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:superspeeder/vkism.git&quot;,
+    &quot;accountId&quot;: &quot;57bac151-b056-4d2d-97db-68781ceded8a&quot;
   }
-}]]></component>
+}</component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="ohSLdqWk" />
   </component>
@@ -63,6 +69,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.rust.reset.selective.auto.import": "true",
     "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -107,7 +114,8 @@
       <option name="presentableId" value="Default" />
       <updated>1744737477450</updated>
       <workItem from="1744737478751" duration="37000" />
-      <workItem from="1744737757348" duration="19993000" />
+      <workItem from="1744737757348" duration="20710000" />
+      <workItem from="1744847746857" duration="8257000" />
     </task>
     <task id="LOCAL-00001" summary="log the fps">
       <option name="closed" value="true" />
@@ -125,7 +133,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744821436075</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Start work on pipelines.">
+      <option name="closed" value="true" />
+      <created>1744823944078</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1744823944078</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -134,6 +150,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="log the fps" />
     <MESSAGE value="Simplify setting clear colors for attachments on a PrimaryRenderer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Simplify setting clear colors for attachments on a PrimaryRenderer" />
+    <MESSAGE value="Start work on pipelines." />
+    <option name="LAST_COMMIT_MESSAGE" value="Start work on pipelines." />
   </component>
 </project>

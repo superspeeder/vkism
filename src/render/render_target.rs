@@ -235,6 +235,14 @@ impl SwapchainRenderTarget {
             present_queue: render_system.queues().present,
         })
     }
+
+    pub fn get_swapchain_format(&self) -> Format {
+        self.format.format
+    }
+
+    pub fn get_swapchain_extent(&self) -> Extent2D {
+        self.extent.clone()
+    }
 }
 
 impl RenderTarget for SwapchainRenderTarget {

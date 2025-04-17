@@ -3,7 +3,7 @@ use crate::render::descriptor::DescriptorSetLayout;
 use crate::render::shader::ShaderModule;
 use anyhow::anyhow;
 use ash::vk;
-use ash::vk::{PipelineLayoutCreateFlags, PipelineLayoutCreateInfo, StructureType};
+use ash::vk::{CullModeFlags, FrontFace, Offset2D, PipelineLayoutCreateFlags, PipelineLayoutCreateInfo, PolygonMode, Rect2D, SampleCountFlags, ShaderStageFlags, StructureType, Viewport};
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::ops::Range;
@@ -63,6 +63,7 @@ impl PipelineLayout {
         }
     }
 
+    #[inline]
     pub fn handle(&self) -> vk::PipelineLayout {
         self.pipeline_layout
     }
@@ -77,7 +78,7 @@ impl Drop for PipelineLayout {
     }
 }
 
-pub struct Pipeline {
+pub struct GraphicsPipeline {
     pipeline: ash::vk::Pipeline,
     device: ash::Device,
 }
@@ -93,6 +94,7 @@ pub enum PipelineRenderCompatibility {
 }
 
 impl PipelineRenderCompatibility {
+    #[inline]
     pub fn simple_from_format(format: vk::Format) -> Self {
         Self::RenderingInfo {
             view_mask: 0,
@@ -102,6 +104,7 @@ impl PipelineRenderCompatibility {
         }
     }
 
+    #[inline]
     pub fn simple_from_format_d24s8(format: vk::Format) -> Self {
         Self::RenderingInfo {
             view_mask: 0,
@@ -136,7 +139,7 @@ pub struct RasterizerDescription {
 pub struct MultisamplingDescription {
     pub rasterization_samples: vk::SampleCountFlags,
     pub min_sample_shading: Option<f32>, // sample shading will be disabled if this is None
-    pub sample_mask: u64, // will be interpreted based on size of rasterization_samples
+    pub sample_mask: [u32; 2],
     pub alpha_to_coverage: bool,
     pub alpha_to_one: bool,
 }
@@ -159,7 +162,7 @@ pub struct ColorBlendingDescription {
     pub attachments: Vec<vk::PipelineColorBlendAttachmentState>,
 }
 
-pub struct PipelineDescription {
+pub struct GraphicsPipelineDescription {
     pub layout: Rc<PipelineLayout>,
     pub rendering_compatibility: PipelineRenderCompatibility,
     pub shader_stages: Vec<(vk::ShaderStageFlags, Rc<ShaderModule>, String)>,
@@ -177,10 +180,10 @@ pub struct PipelineDescription {
     pub dynamic_states: Vec<vk::DynamicState>,
 }
 
-impl Pipeline {
+impl GraphicsPipeline {
     pub fn new(
         render_system: &RenderSystem,
-        description: &PipelineDescription,
+        description: &GraphicsPipelineDescription,
     ) -> anyhow::Result<Self> {
         let vertex_description = vk::PipelineVertexInputStateCreateInfo::default()
             .vertex_binding_descriptions(description.vertex_layout.bindings.as_slice())
@@ -261,15 +264,29 @@ impl Pipeline {
                 .depth_bias_slope_factor(bias.slope_facator);
         }
 
-        let sample_mask_raw = [((description.multisampling.sample_mask >> 32) & 0xffffffff) as u32, (description.multisampling.sample_mask & 0xffffffff) as u32];
-        let sample_mask_slice = if description.multisampling.rasterization_samples == vk::SampleCountFlags::;
-
         let multisample_state = vk::PipelineMultisampleStateCreateInfo::default()
             .alpha_to_coverage_enable(description.multisampling.alpha_to_coverage)
             .alpha_to_one_enable(description.multisampling.alpha_to_one)
+            .rasterization_samples(description.multisampling.rasterization_samples)
             .min_sample_shading(description.multisampling.min_sample_shading.unwrap_or(1.0))
             .sample_shading_enable(description.multisampling.min_sample_shading.is_some())
-            .sample_mask()
+            .sample_mask(description.multisampling.sample_mask.as_slice());
+
+        let mut depth_stencil_state = vk::PipelineDepthStencilStateCreateInfo::default();
+
+        let color_blend_state = vk::PipelineColorBlendStateCreateInfo::default()
+            .logic_op_enable(description.color_blending.logic_op.is_some())
+            .logic_op(
+                description
+                    .color_blending
+                    .logic_op
+                    .unwrap_or(vk::LogicOp::CLEAR),
+            )
+            .blend_constants(description.color_blending.blend_constants)
+            .attachments(description.color_blending.attachments.as_slice());
+
+        let dynamic_state = vk::PipelineDynamicStateCreateInfo::default()
+            .dynamic_states(description.dynamic_states.as_slice());
 
         let mut create_info = vk::GraphicsPipelineCreateInfo::default()
             .layout(description.layout.handle())
@@ -280,7 +297,24 @@ impl Pipeline {
             .input_assembly_state(&input_assembly_state)
             .tessellation_state(&tessellation_state)
             .viewport_state(&viewport_state)
-            .rasterization_state(&rasterizer_state);
+            .rasterization_state(&rasterizer_state)
+            .multisample_state(&multisample_state)
+            .color_blend_state(&color_blend_state)
+            .dynamic_state(&dynamic_state);
+
+        if let Some(depth_stencil) = &description.depth_stencil {
+            depth_stencil_state = depth_stencil_state
+                .depth_test_enable(depth_stencil.depth_test)
+                .depth_write_enable(depth_stencil.depth_write)
+                .depth_compare_op(depth_stencil.depth_compare_op)
+                .depth_bounds_test_enable(depth_stencil.depth_bounds_test)
+                .stencil_test_enable(depth_stencil.stencil_test)
+                .front(depth_stencil.stencil_front)
+                .back(depth_stencil.stencil_back)
+                .min_depth_bounds(depth_stencil.depth_bounds.start)
+                .max_depth_bounds(depth_stencil.depth_bounds.end);
+            create_info = create_info.depth_stencil_state(&depth_stencil_state);
+        }
 
         if let Some(rendering_state) = rendering_state.as_mut() {
             create_info = create_info.push_next(rendering_state);
@@ -299,4 +333,112 @@ impl Pipeline {
             })
         }
     }
+
+    #[inline]
+    pub fn handle(&self) -> vk::Pipeline {
+        self.pipeline
+    }
 }
+
+impl Drop for GraphicsPipeline {
+    fn drop(&mut self) {
+        unsafe {
+            self.device.destroy_pipeline(self.pipeline, None);
+        }
+    }
+}
+
+#[inline]
+pub const fn standard_blend_attachment() -> vk::PipelineColorBlendAttachmentState {
+    vk::PipelineColorBlendAttachmentState {
+        blend_enable: vk::TRUE,
+        src_color_blend_factor: vk::BlendFactor::SRC_ALPHA,
+        dst_color_blend_factor: vk::BlendFactor::ONE_MINUS_SRC_ALPHA,
+        color_blend_op: vk::BlendOp::ADD,
+        src_alpha_blend_factor: vk::BlendFactor::ONE,
+        dst_alpha_blend_factor: vk::BlendFactor::ZERO,
+        alpha_blend_op: vk::BlendOp::ADD,
+        color_write_mask: vk::ColorComponentFlags::RGBA,
+    }
+}
+
+impl Default for RasterizerDescription {
+    fn default() -> Self {
+        Self {
+            polygon_mode: PolygonMode::FILL,
+            cull_mode: CullModeFlags::NONE,
+            front_face: FrontFace::CLOCKWISE,
+            clamp_depth: false,
+            discard_output: false,
+            depth_bias: None,
+            line_width: 1.0,
+        }
+    }
+}
+
+impl Default for ColorBlendingDescription {
+    fn default() -> Self {
+        Self {
+            logic_op: None,
+            blend_constants: [0.0, 0.0, 0.0, 0.0],
+            attachments: vec![],
+        }
+    }
+}
+
+impl Default for MultisamplingDescription {
+    fn default() -> Self {
+        Self {
+            rasterization_samples: SampleCountFlags::TYPE_1,
+            min_sample_shading: None,
+            sample_mask: [!0u32, !0u32],
+            alpha_to_coverage: false,
+            alpha_to_one: false,
+        }
+    }
+}
+
+#[inline]
+pub const fn standard_viewport_scissor_from_extent(extent: vk::Extent2D) -> (Viewport, Rect2D) {
+    (
+        Viewport {
+            x: 0.0,
+            y: 0.0,
+            width: extent.width as f32,
+            height: extent.height as f32,
+            min_depth: 0.0,
+            max_depth: 1.0,
+        },
+        Rect2D {
+            offset: Offset2D { x: 0, y: 0 },
+            extent,
+        },
+    )
+}
+
+impl Default for VertexLayout {
+    fn default() -> Self {
+        Self {
+            bindings: vec![],
+            attributes: vec![],
+        }
+    }
+}
+
+#[inline]
+pub fn standard_vertex_fragment_stages(vertex_shader: Rc<ShaderModule>, fragment_shader: Rc<ShaderModule>) -> Vec<(ShaderStageFlags, Rc<ShaderModule>, String)> {
+    vec![
+        (
+            ShaderStageFlags::VERTEX,
+            vertex_shader.clone(),
+            "main".to_string(),
+        ),
+        (
+            ShaderStageFlags::FRAGMENT,
+            fragment_shader.clone(),
+            "main".to_string(),
+        ),
+    ]
+}
+
+

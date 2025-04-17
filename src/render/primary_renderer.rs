@@ -153,7 +153,7 @@ impl PrimaryRenderer {
                                     layer_count: 1,
                                 },
                                 src_state: (
-                                    PipelineStageFlags2::TOP_OF_PIPE,
+                                    PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT,
                                     ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
                                     AccessFlags2::COLOR_ATTACHMENT_WRITE,
                                     0,
@@ -235,5 +235,20 @@ impl PrimaryRenderer {
         );
 
         self.end_frame();
+    }
+}
+
+impl Drop for PrimaryRenderer {
+    fn drop(&mut self) {
+        unsafe {
+            for sync in &self.frame_sync_infos {
+                self.device.destroy_semaphore(sync.image_available, None);
+                self.device.destroy_semaphore(sync.render_finished, None);
+            }
+
+            for fence in self.fences {
+                self.device.destroy_fence(fence, None);
+            }
+        }
     }
 }
